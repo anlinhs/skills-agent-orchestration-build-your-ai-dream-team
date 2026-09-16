@@ -1,0 +1,408 @@
+/* =========================================================================
+   Project Pulse — Dashboard styles
+   Owner: Designer (sole owner of app/styles.css)
+
+   Shared contract (must match Coder's HTML class names):
+   - Layout hooks:   .dashboard (grid wrapper), .project-card (each card)
+   - Card fields:    name, owner, status, recentActivity, priority
+   - Status classes: .status + .status-active | .status-at-risk
+                                | .status-blocked | .status-done
+   - Priority classes: .priority + .priority-high | .priority-medium
+                                  | .priority-low
+   ========================================================================= */
+
+/* ---- Design tokens ---------------------------------------------------- */
+:root {
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Radius + elevation */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06),
+                 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-card-hover: 0 6px 16px rgba(15, 23, 42, 0.12),
+                       0 12px 28px rgba(15, 23, 42, 0.14);
+
+  /* Neutral palette */
+  --bg-app: #f1f5f9;
+  --bg-surface: #ffffff;
+  --border-subtle: #e2e8f0;
+  --text-strong: #0f172a;
+  --text-default: #334155;
+  --text-muted: #64748b;
+
+  /* Brand accent */
+  --accent: #4f46e5;
+  --accent-strong: #4338ca;
+
+  /* Status colors (AA-contrast text on tinted backgrounds) */
+  --status-active-bg: #dcfce7;
+  --status-active-fg: #166534;
+  --status-active-dot: #16a34a;
+
+  --status-at-risk-bg: #fef3c7;
+  --status-at-risk-fg: #854d0e;
+  --status-at-risk-dot: #d97706;
+
+  --status-blocked-bg: #fee2e2;
+  --status-blocked-fg: #991b1b;
+  --status-blocked-dot: #dc2626;
+
+  --status-done-bg: #e0e7ff;
+  --status-done-fg: #3730a3;
+  --status-done-dot: #6366f1;
+
+  --status-neutral-bg: #e2e8f0;
+  --status-neutral-fg: #334155;
+  --status-neutral-dot: #64748b;
+
+  /* Priority colors */
+  --priority-high-fg: #b91c1c;
+  --priority-high-bg: #fef2f2;
+  --priority-high-border: #fecaca;
+
+  --priority-medium-fg: #b45309;
+  --priority-medium-bg: #fffbeb;
+  --priority-medium-border: #fde68a;
+
+  --priority-low-fg: #047857;
+  --priority-low-bg: #ecfdf5;
+  --priority-low-border: #a7f3d0;
+
+  --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---- Base ------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-stack);
+  color: var(--text-default);
+  background-color: var(--bg-app);
+  background-image:
+    radial-gradient(1200px 400px at 100% -10%, rgba(79, 70, 229, 0.08), transparent),
+    radial-gradient(900px 400px at -10% 0%, rgba(14, 165, 233, 0.06), transparent);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Page header ------------------------------------------------------ */
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5) var(--space-5);
+}
+
+.page-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.page-header__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent), #06b6d4);
+  color: #fff;
+  font-size: 1.4rem;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+  flex: none;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+  line-height: 1.1;
+}
+
+.page-header__subtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  max-width: 60ch;
+}
+
+/* ---- Dashboard grid --------------------------------------------------- */
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5) var(--space-7);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-5);
+  align-items: start;
+}
+
+/* ---- Project card ----------------------------------------------------- */
+.project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+/* Accent rail keeps a strong dashboard feel */
+.project-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  background: linear-gradient(180deg, var(--accent), #06b6d4);
+  opacity: 0.85;
+}
+
+.project-card:hover,
+.project-card:focus-within {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: #cbd5e1;
+}
+
+/* Keyboard focus affordance if a card is made focusable/interactive */
+.project-card:focus-visible,
+.project-card a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Card header: name + owner + status ------------------------------- */
+.project-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.project-card__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+}
+
+.project-card__owner {
+  margin: var(--space-1) 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.project-card__owner .label {
+  font-weight: 600;
+  color: var(--text-default);
+}
+
+/* ---- Status badge ----------------------------------------------------- */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  /* Neutral default for any unmatched status value */
+  background-color: var(--status-neutral-bg);
+  color: var(--status-neutral-fg);
+}
+
+/* Non-color-only cue: a labeled dot precedes the text */
+.status::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--status-neutral-dot);
+  flex: none;
+}
+
+.status-active {
+  background-color: var(--status-active-bg);
+  color: var(--status-active-fg);
+}
+.status-active::before { background-color: var(--status-active-dot); }
+
+.status-at-risk {
+  background-color: var(--status-at-risk-bg);
+  color: var(--status-at-risk-fg);
+}
+.status-at-risk::before { background-color: var(--status-at-risk-dot); }
+
+.status-blocked {
+  background-color: var(--status-blocked-bg);
+  color: var(--status-blocked-fg);
+}
+.status-blocked::before { background-color: var(--status-blocked-dot); }
+
+.status-done {
+  background-color: var(--status-done-bg);
+  color: var(--status-done-fg);
+}
+.status-done::before { background-color: var(--status-done-dot); }
+
+/* ---- Recent activity -------------------------------------------------- */
+.project-card__activity {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.9rem;
+  color: var(--text-default);
+  background-color: #f8fafc;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.project-card__activity .label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+/* ---- Card footer: priority ------------------------------------------- */
+.project-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.project-card__footer-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ---- Priority treatment ---------------------------------------------- */
+.priority {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-default);
+}
+
+/* Non-color-only cue: severity glyph before the priority label */
+.priority::before {
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+.priority-high {
+  color: var(--priority-high-fg);
+  background-color: var(--priority-high-bg);
+  border-color: var(--priority-high-border);
+}
+.priority-high::before { content: "\25B2"; } /* ▲ up triangle */
+
+.priority-medium {
+  color: var(--priority-medium-fg);
+  background-color: var(--priority-medium-bg);
+  border-color: var(--priority-medium-border);
+}
+.priority-medium::before { content: "\25C6"; } /* ◆ diamond */
+
+.priority-low {
+  color: var(--priority-low-fg);
+  background-color: var(--priority-low-bg);
+  border-color: var(--priority-low-border);
+}
+.priority-low::before { content: "\25BC"; } /* ▼ down triangle */
+
+/* ---- Empty / error states -------------------------------------------- */
+.dashboard__message {
+  grid-column: 1 / -1;
+  padding: var(--space-6);
+  text-align: center;
+  background-color: var(--bg-surface);
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
+
+.dashboard__message--error {
+  border-color: var(--status-blocked-dot);
+  color: var(--status-blocked-fg);
+  background-color: var(--status-blocked-bg);
+}
+
+/* ---- Responsive ------------------------------------------------------- */
+@media (max-width: 640px) {
+  .page-header {
+    padding: var(--space-6) var(--space-4) var(--space-4);
+  }
+  .dashboard {
+    grid-template-columns: 1fr;
+    padding: 0 var(--space-4) var(--space-6);
+    gap: var(--space-4);
+  }
+  .project-card {
+    padding: var(--space-4);
+  }
+}
+
+/* ---- Motion & contrast preferences ----------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .project-card {
+    transition: none;
+  }
+  .project-card:hover,
+  .project-card:focus-within {
+    transform: none;
+  }
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main aria-labelledby="page-title">
+      <header>
+        <h1 id="page-title">Project Pulse</h1>
+        <p>Track team progress, recent activity, and current priorities across active work.</p>
+      </header>
+
+      <section aria-live="polite" aria-labelledby="dashboard-title">
+        <h2 id="dashboard-title">Project Dashboard</h2>
+        <div class="dashboard" id="dashboard">
+          <p>Loading projects...</p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        const dashboard = document.getElementById('dashboard');
+
+        function toKebabCase(value) {
+          return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        }
+
+        function getSafeValue(value, fallback) {
+          if (typeof value !== 'string') {
+            return fallback;
+          }
+
+          const trimmedValue = value.trim();
+          return trimmedValue ? trimmedValue : fallback;
+        }
+
+        function showMessage(message) {
+          dashboard.innerHTML = '';
+          const messageElement = document.createElement('p');
+          messageElement.textContent = message;
+          dashboard.appendChild(messageElement);
+        }
+
+        function createDetailRow(label, contentNode) {
+          const row = document.createElement('p');
+          const strong = document.createElement('strong');
+          strong.textContent = label + ': ';
+          row.appendChild(strong);
+          row.appendChild(contentNode);
+          return row;
+        }
+
+        function createBadge(text, baseClassName, fallbackSuffix) {
+          const safeText = getSafeValue(text, 'Unknown');
+          const suffix = toKebabCase(safeText) || fallbackSuffix;
+          const badge = document.createElement('span');
+          badge.className = baseClassName + ' ' + baseClassName + '-' + suffix;
+          badge.textContent = safeText;
+          return badge;
+        }
+
+        function renderProjects(projects) {
+          if (!Array.isArray(projects) || projects.length === 0) {
+            showMessage('No projects are available right now.');
+            return;
+          }
+
+          dashboard.innerHTML = '';
+
+          const projectList = document.createElement('div');
+
+          projects.forEach(function (project) {
+            const safeProject = project && typeof project === 'object' ? project : {};
+            const name = getSafeValue(safeProject.name, 'Unknown Project');
+            const owner = getSafeValue(safeProject.owner, 'Unknown');
+            const recentActivity = getSafeValue(safeProject.recentActivity, 'No recent activity provided.');
+
+            const card = document.createElement('article');
+            card.className = 'project-card';
+
+            const title = document.createElement('h3');
+            title.textContent = name;
+            card.appendChild(title);
+
+            const ownerText = document.createTextNode(owner);
+            card.appendChild(createDetailRow('Owner', ownerText));
+
+            const statusBadge = createBadge(safeProject.status, 'status', 'unknown');
+            card.appendChild(createDetailRow('Status', statusBadge));
+
+            const activityText = document.createTextNode(recentActivity);
+            card.appendChild(createDetailRow('Recent Activity', activityText));
+
+            const priorityBadge = createBadge(safeProject.priority, 'priority', 'unknown');
+            card.appendChild(createDetailRow('Priority', priorityBadge));
+
+            projectList.appendChild(card);
+          });
+
+          dashboard.appendChild(projectList);
+        }
+
+        fetch('project-data.json')
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error('Request failed with status ' + response.status + '.');
+            }
+
+            return response.json();
+          })
+          .then(function (data) {
+            renderProjects(data && data.projects);
+          })
+          .catch(function () {
+            showMessage('Unable to load project data. Please run the dashboard from the local server and try again.');
+          });
+      }());
+    </script>
+  </body>
+</html>

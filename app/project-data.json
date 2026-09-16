@@ -1,0 +1,39 @@
+{
+  "projects": [
+    {
+      "name": "Onboarding Flow Refresh",
+      "owner": "Mona",
+      "status": "Active",
+      "recentActivity": "Published the updated welcome checklist for new contributors.",
+      "priority": "High"
+    },
+    {
+      "name": "Docs Search Upgrade",
+      "owner": "Diego",
+      "status": "At Risk",
+      "recentActivity": "Search relevance testing found inconsistent tag coverage.",
+      "priority": "Medium"
+    },
+    {
+      "name": "Release Automation",
+      "owner": "Priya",
+      "status": "Blocked",
+      "recentActivity": "Waiting on repository permissions for the deployment bot.",
+      "priority": "High"
+    },
+    {
+      "name": "Community Metrics Snapshot",
+      "owner": "Avery",
+      "status": "Done",
+      "recentActivity": "Shared the August dashboard summary with the contributor team.",
+      "priority": "Low"
+    },
+    {
+      "name": "Mentor Office Hours",
+      "owner": "Sam",
+      "status": "Active",
+      "recentActivity": "Confirmed the next two facilitator schedules and signup slots.",
+      "priority": "Medium"
+    }
+  ]
+}
